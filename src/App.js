@@ -1,51 +1,53 @@
-import React, {useState} from 'react'
-
-function computeInitialCounter() {
-  console.log('some calc')
-  return Math.trunc(Math.random() * 20)
-}
+import React, {useEffect, useState} from 'react'
 
 function App() {
-  //const [counter, setCounter]= useState(0)
-  //const [counter, setCounter]= useState(computeInitialCounter())
-  const [counter, setCounter]= useState(() => {
-    return computeInitialCounter()
+  
+  const [type, setType] = useState('users')
+  const [data, setData] = useState([])
+  const [pos, setPos] = useState({
+    x: 0, y: 0
   })
 
-  const [state, setState] = useState({
-    title: 'counter',
-    date: Date.now()
-  })
+  // useEffect(() => {
+  //   console.log('render')
+  // })
 
-  function increment() {
-    //setCounter(counter + 1)
-    setCounter((prevCounter) => {
-      return prevCounter + 1
-    })
-    setCounter(prev => prev + 1)
-  }
+  useEffect(() => {
+    fetch(`https://jsonplaceholder.typicode.com/${type}`)
+      .then(response => response.json())
+      .then(json => setData(json))
+    
+    return () => {
+      console.log('clean type')
+    }
+  }, [type])
 
-  function decrement() {
-    setCounter(counter - 1)
-  }
-
-  function updateTitle() {
-    setState(prev => {
-      return {
-        ...prev,
-        title: 'New title' 
-      }
+  const mouseMoveHandler = event => {
+    setPos({
+      x: event.clientX,
+      y: event.clientY
     })
   }
+
+  useEffect(() => {
+    console.log('Component did mount')
+
+    window.addEventListener('mousemove', mouseMoveHandler)
+
+    return () => {
+      window.removeEventListener('mousemove', mouseMoveHandler)
+    }
+  }, [])
 
   return (
     <div>
-      <h1>Counter: {counter}</h1>
-      <button onClick={increment} className='btn btn-success'>Add</button>
-      <button onClick={decrement} className='btn btn-danger'>Delete</button>
-      <button onClick={updateTitle} className='btn btn-default'>Update title</button>
+      <h1>Resurs: {type}</h1>
+      <button onClick={() => setType('users')}>Users</button>
+      <button onClick={() => setType('todos')}>Todos</button>
+      <button onClick={() => setType('posts')}>Posts</button>
 
-      <pre>{JSON.stringify(state, null, 2)}</pre>
+      {/* <pre>{JSON.stringify(data, null, 2)}</pre> */}
+      <pre>{JSON.stringify(pos, null, 2)}</pre>
     </div>
   );
 }
